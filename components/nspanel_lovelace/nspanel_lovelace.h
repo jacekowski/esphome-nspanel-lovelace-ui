@@ -83,8 +83,8 @@ class NSPanelLovelace : public Component, public uart::UARTDevice {
   bool is_updating_ = false;
   bool reparse_mode_ = false;
 
-  uint8_t *transfer_buffer_{nullptr};
-  size_t transfer_buffer_size_;
+  //uint8_t *transfer_buffer_{nullptr};
+  //size_t transfer_buffer_size_;
   bool upload_first_chunk_sent_ = false;
 
   /**
