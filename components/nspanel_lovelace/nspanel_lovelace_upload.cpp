@@ -101,9 +101,9 @@ int NSPanelLovelace::upload_by_chunks_(const std::string &url, int range_start) 
         ESP_LOGD(TAG, "Uploaded %0.2f %%, remaining %d bytes, free heap %lu bytes",
                  100.0 * (this->tft_size_ - this->content_length_) / this->tft_size_, this->content_length_, esp_get_free_heap_size());
         if (recv_string[0] != 0x05) {  // 0x05 == "ok"
-          ESP_LOGD(
-              TAG, "recv_string [%s]",
-              format_hex_pretty(reinterpret_cast<const uint8_t *>(recv_string.data()), recv_string.size()).c_str());
+          char hex_buf[format_hex_pretty_size(32)];
+          ESP_LOGD(TAG, "recv_string [%s] (%u)",
+                   format_hex_pretty_to(hex_buf, reinterpret_cast<const uint8_t *>(recv_string.data()), recv_string.size(), '.'), static_cast<unsigned>(recv_string.size()));
         }
         // handle partial upload request
         if (recv_string[0] == 0x08 && recv_string.size() != 5) {
@@ -268,8 +268,10 @@ void NSPanelLovelace::upload_tft(const std::string &url) {
 
 
   // NOLINTNEXTLINE(readability-static-accessed-through-instance)
-  ESP_LOGD(TAG, "Updating tft from \"%s\" with a file size of %d , Heap Size %ld",
-           url.c_str(), this->content_length_, esp_get_free_heap_size());
+  char hex_buf[format_hex_pretty_size(32)];
+  ESP_LOGD(TAG, "Upgrade response is [%s] (%u)",
+           format_hex_pretty_to(hex_buf, reinterpret_cast<const uint8_t *>(response.data()), response.size(), '.'),
+           static_cast<unsigned>(response.size()));
 
   int result = 0;
   while (this->content_length_ > 0) {
