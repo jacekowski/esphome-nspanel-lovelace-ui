@@ -256,8 +256,11 @@ void NSPanelLovelace::upload_tft(const std::string &url) {
   this->recv_ret_string_(response, 2000, true);  // This can take some time to return
 
   // The Nextion display will, if it's ready to accept data, send a 0x05 byte.
-  ESP_LOGD(TAG, "Upgrade response is [%s]",
-           format_hex_pretty(reinterpret_cast<const uint8_t *>(response.data()), response.size()).c_str());
+  char hex_buf[format_hex_pretty_size(32)];
+  ESP_LOGD(TAG, "Upgrade response is [%s] (%u)",
+           format_hex_pretty_to(hex_buf, reinterpret_cast<const uint8_t *>(response.data()), response.size(), '.'),
+           static_cast<unsigned>(response.size()));
+
 
   if (response.find(0x05) != std::string::npos) {
     ESP_LOGD(TAG, "preparation for tft update done");
@@ -268,11 +271,9 @@ void NSPanelLovelace::upload_tft(const std::string &url) {
 
 
   // NOLINTNEXTLINE(readability-static-accessed-through-instance)
-  char hex_buf[format_hex_pretty_size(32)];
-  ESP_LOGD(TAG, "Upgrade response is [%s] (%u)",
-           format_hex_pretty_to(hex_buf, reinterpret_cast<const uint8_t *>(response.data()), response.size(), '.'),
-           static_cast<unsigned>(response.size()));
-
+  ESP_LOGD(TAG, "Updating tft from \"%s\" with a file size of %d , Heap Size %ld",
+           url.c_str(), this->content_length_, esp_get_free_heap_size());
+  
   int result = 0;
   while (this->content_length_ > 0) {
     vTaskDelay(pdMS_TO_TICKS(1));
